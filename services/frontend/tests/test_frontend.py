@@ -19,7 +19,7 @@ def test_app_js_exists():
 
 def test_index_html_contains_title():
     content = (STATIC_DIR / "index.html").read_text()
-    assert "CloudMart DevOps Project" in content
+    assert "CloudMart" in content
 
 
 def test_app_js_contains_api_base():

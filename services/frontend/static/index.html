@@ -3,82 +3,304 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CloudMart DevOps Project</title>
+    <title>CloudMart DevOps Project - DevOps Project</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/style.css">
 </head>
 <body>
-    <header>
-        <div class="container">
-            <h1>CloudMart DevOps Project</h1>
-            <nav>
-                <a href="#" onclick="showSection('products')" class="active" id="nav-products">Products</a>
-                <a href="#" onclick="openCartModal()" id="cart-link">Cart (<span id="cart-count">0</span>)</a>
-                <a href="#" onclick="openOrdersModal()" id="orders-link">Orders</a>
+    <!-- Top Navigation -->
+    <header class="app-header">
+        <div class="header-container">
+            <div class="brand-group">
+                <div class="brand-logo">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/>
+                    </svg>
+                </div>
+                <div class="brand-text">
+                    <span class="brand-title">CloudMart</span>
+                    <span class="brand-badge">DevOps Capstone</span>
+                </div>
+            </div>
+
+            <nav class="nav-links">
+                <a href="#catalog" class="nav-link active">Catalog</a>
+                <button class="nav-btn" onclick="openArchitectureModal()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/>
+                    </svg>
+                    Architecture
+                </button>
+                <button class="nav-btn" onclick="openOrdersModal()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/>
+                    </svg>
+                    Orders
+                </button>
+                <button class="cart-trigger-btn" onclick="openCartDrawer()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/>
+                        <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/>
+                    </svg>
+                    <span class="cart-label">Cart</span>
+                    <span class="cart-counter" id="cart-count">0</span>
+                </button>
             </nav>
         </div>
     </header>
 
-    <main class="container">
-        <section class="hero">
-            <h2>Microservices E-Commerce Platform</h2>
-            <p>Production-Grade DevOps Capstone on AWS EKS</p>
-            <div class="stack-badges">
-                <span>EKS 1.31</span>
-                <span>FastAPI</span>
-                <span>PostgreSQL 16</span>
-                <span>Redis 7</span>
-                <span>Terraform</span>
-                <span>ArgoCD</span>
-                <span>Prometheus</span>
-            </div>
-            <div class="session-info">
-                <span>Active Session: <strong id="session-display">...</strong></span>
+    <main class="main-wrapper">
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <div class="hero-glow"></div>
+            <div class="hero-content">
+                <div class="system-health-pill">
+                    <span class="pulse-dot"></span>
+                    <span class="health-text">Cluster Status: All Microservices Operational</span>
+                    <span class="eks-version-tag">EKS 1.31</span>
+                </div>
+                <h1 class="hero-heading">
+                    Enterprise Microservices Platform on <span class="gradient-text">AWS EKS</span>
+                </h1>
+                <p class="hero-subheading">
+                    Engineered with 4 containerized services, PostgreSQL RDS multi-AZ, ElastiCache Redis,
+                    ArgoCD GitOps declarative continuous deployment, and 14 strict DevSecOps controls.
+                </p>
+
+                <!-- Stack Pills -->
+                <div class="tech-stack-row">
+                    <div class="tech-pill"><span class="pill-dot blue"></span>Frontend :8080 (Nginx)</div>
+                    <div class="tech-pill"><span class="pill-dot green"></span>Catalog :8000 (FastAPI + RDS)</div>
+                    <div class="tech-pill"><span class="pill-dot red"></span>Cart :8000 (FastAPI + Redis)</div>
+                    <div class="tech-pill"><span class="pill-dot purple"></span>Orders :8000 (FastAPI + RDS)</div>
+                    <div class="tech-pill"><span class="pill-dot orange"></span>GitOps (ArgoCD)</div>
+                </div>
+
+                <!-- Session & Quick Details -->
+                <div class="session-strip">
+                    <div class="session-item">
+                        <span class="label">Session ID:</span>
+                        <code class="value" id="session-display">initializing...</code>
+                    </div>
+                    <div class="session-item">
+                        <span class="label">Ingress Route:</span>
+                        <span class="value">ALB &rarr; /api/* Path-Based</span>
+                    </div>
+                    <div class="session-item">
+                        <span class="label">Author:</span>
+                        <a href="https://github.com/modimihir07" target="_blank" class="author-link">Mihir Modi</a>
+                    </div>
+                </div>
             </div>
         </section>
 
-        <section class="products" id="products-grid">
-            <div class="loading">Loading products...</div>
+        <!-- Catalog Header & Filters -->
+        <section class="catalog-section" id="catalog">
+            <div class="catalog-header-bar">
+                <div class="catalog-title-group">
+                    <h2>Hardware Catalog</h2>
+                    <span class="catalog-subtitle" id="products-count-label">Loading available inventory...</span>
+                </div>
+
+                <div class="filter-controls">
+                    <div class="search-box">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
+                        </svg>
+                        <input type="text" id="search-input" placeholder="Search products..." oninput="handleSearch(this.value)">
+                    </div>
+
+                    <div class="category-tabs" id="category-tabs">
+                        <button class="tab-btn active" onclick="filterCategory('all')">All</button>
+                        <button class="tab-btn" onclick="filterCategory('audio')">Audio</button>
+                        <button class="tab-btn" onclick="filterCategory('peripherals')">Peripherals</button>
+                        <button class="tab-btn" onclick="filterCategory('displays')">Displays</button>
+                        <button class="tab-btn" onclick="filterCategory('accessories')">Accessories</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Products Grid -->
+            <div class="products-grid" id="products-grid">
+                <!-- Skeletons render here while fetching -->
+                <div class="product-skeleton"></div>
+                <div class="product-skeleton"></div>
+                <div class="product-skeleton"></div>
+                <div class="product-skeleton"></div>
+            </div>
         </section>
     </main>
 
-    <!-- Cart Modal -->
-    <div id="cart-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
+    <!-- Cart Slide-Over Drawer -->
+    <div id="cart-drawer-overlay" class="drawer-overlay" onclick="closeCartDrawer()"></div>
+    <aside id="cart-drawer" class="cart-drawer">
+        <div class="drawer-header">
+            <div class="drawer-title">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/>
+                    <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/>
+                </svg>
                 <h3>Shopping Cart</h3>
-                <span class="close-btn" onclick="closeCartModal()">&times;</span>
             </div>
-            <div id="cart-items-container" class="cart-items">
-                <p class="empty-state">Your cart is empty.</p>
+            <button class="close-drawer-btn" onclick="closeCartDrawer()">&times;</button>
+        </div>
+
+        <div class="drawer-body" id="cart-items-container">
+            <div class="cart-empty-view">
+                <div class="empty-icon-wrap">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/>
+                        <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/>
+                    </svg>
+                </div>
+                <h4>Your cart is empty</h4>
+                <p>Add high-performance hardware gear from the catalog to test Redis session persistence and order checkout.</p>
             </div>
-            <div class="cart-footer">
-                <div class="cart-total-bar">
-                    <span>Total:</span>
-                    <strong id="cart-total-price">$0.00</strong>
+        </div>
+
+        <div class="drawer-footer">
+            <div class="summary-line">
+                <span>Subtotal</span>
+                <span id="cart-subtotal">$0.00</span>
+            </div>
+            <div class="summary-line">
+                <span>Fast EKS Delivery</span>
+                <span class="free-tag">FREE</span>
+            </div>
+            <div class="summary-line total-line">
+                <span>Total Due</span>
+                <span id="cart-total-price" class="total-amount">$0.00</span>
+            </div>
+            <button class="action-btn checkout-btn" id="checkout-btn" onclick="checkout()" disabled>
+                <span class="btn-text">Confirm &amp; Place Order</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
+                </svg>
+            </button>
+            <div class="checkout-hint">
+                Atomic database insertion into PostgreSQL <code>orders</code> table via <code>order-service</code>.
+            </div>
+        </div>
+    </aside>
+
+    <!-- Orders Modal -->
+    <div id="orders-modal" class="modal-backdrop">
+        <div class="modal-panel">
+            <div class="modal-header">
+                <div class="modal-title-wrap">
+                    <div class="modal-icon blue">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3>Session Order History</h3>
+                        <p class="modal-desc">Real-time records queried from PostgreSQL <code>orders</code> table</p>
+                    </div>
                 </div>
-                <div class="cart-actions">
-                    <button class="btn btn-secondary" onclick="closeCartModal()">Continue Shopping</button>
-                    <button class="btn btn-primary" id="checkout-btn" onclick="checkout()" disabled>Place Order</button>
-                </div>
+                <button class="modal-close" onclick="closeOrdersModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="orders-container">
+                <div class="loading-state">Querying order-service...</div>
+            </div>
+            <div class="modal-footer">
+                <button class="secondary-btn" onclick="closeOrdersModal()">Close</button>
             </div>
         </div>
     </div>
 
-    <!-- Orders Modal -->
-    <div id="orders-modal" class="modal">
-        <div class="modal-content">
+    <!-- Architecture & DevSecOps Modal -->
+    <div id="arch-modal" class="modal-backdrop">
+        <div class="modal-panel arch-panel">
             <div class="modal-header">
-                <h3>Order History</h3>
-                <span class="close-btn" onclick="closeOrdersModal()">&times;</span>
+                <div class="modal-title-wrap">
+                    <div class="modal-icon purple">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3>Platform Architecture &amp; Topologies</h3>
+                        <p class="modal-desc">CloudMart DevOps Project - Technical Blueprint</p>
+                    </div>
+                </div>
+                <button class="modal-close" onclick="closeArchitectureModal()">&times;</button>
             </div>
-            <div id="orders-container" class="orders-list">
-                <p class="empty-state">Loading orders...</p>
+            <div class="modal-body arch-body">
+                <div class="arch-flow-diagram">
+                    <div class="flow-step">
+                        <span class="step-badge">1. Ingress</span>
+                        <strong>AWS ALB</strong>
+                        <small>Path routing to services</small>
+                    </div>
+                    <div class="flow-arrow">&rarr;</div>
+                    <div class="flow-step">
+                        <span class="step-badge">2. Workloads</span>
+                        <strong>EKS 1.31 Pods</strong>
+                        <small>Non-root, read-only FS</small>
+                    </div>
+                    <div class="flow-arrow">&rarr;</div>
+                    <div class="flow-step">
+                        <span class="step-badge">3. Persistence</span>
+                        <strong>RDS + Redis</strong>
+                        <small>KMS encrypted, Multi-AZ</small>
+                    </div>
+                    <div class="flow-arrow">&rarr;</div>
+                    <div class="flow-step">
+                        <span class="step-badge">4. Observability</span>
+                        <strong>Prometheus + OTEL</strong>
+                        <small>Metrics, Logs &amp; Traces</small>
+                    </div>
+                </div>
+
+                <div class="arch-grid">
+                    <div class="arch-card">
+                        <h4>Kubernetes Workloads</h4>
+                        <ul>
+                            <li><strong>frontend:</strong> Nginx 1.27 Alpine (Non-root 1001, emptyDir cache)</li>
+                            <li><strong>product-catalog:</strong> FastAPI Python 3.12, asyncpg, port 8000</li>
+                            <li><strong>cart-service:</strong> FastAPI Python 3.12, redis-py, port 8000</li>
+                            <li><strong>order-service:</strong> FastAPI Python 3.12, asyncpg, port 8000</li>
+                        </ul>
+                    </div>
+                    <div class="arch-card">
+                        <h4>Security &amp; DevSecOps Controls</h4>
+                        <ul>
+                            <li><strong>Pod Security Standards:</strong> Restricted namespace profile</li>
+                            <li><strong>Capabilities:</strong> Drop ALL Linux capabilities</li>
+                            <li><strong>NetworkPolicies:</strong> Default-deny ingress &amp; egress</li>
+                            <li><strong>CI/CD Auditing:</strong> CodeQL SAST + Aqua Trivy image scans</li>
+                        </ul>
+                    </div>
+                </div>
             </div>
-            <div class="cart-footer">
-                <button class="btn btn-secondary" onclick="closeOrdersModal()">Close</button>
+            <div class="modal-footer">
+                <button class="secondary-btn" onclick="closeArchitectureModal()">Done</button>
             </div>
         </div>
     </div>
+
+    <!-- Toast Notifications Container -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+        <div class="footer-container">
+            <div class="footer-left">
+                <strong>CloudMart DevOps Project</strong> - Production-Ready AWS EKS Microservices Platform
+                <p>Designed and built as a DevOps capstone by <strong>Mihir Modi</strong>.</p>
+            </div>
+            <div class="footer-right">
+                <a href="https://github.com/modimihir07" target="_blank" class="social-link">GitHub</a>
+                <span class="sep">&bull;</span>
+                <a href="javascript:void(0)" onclick="openArchitectureModal()" class="social-link">Architecture Blueprint</a>
+                <span class="sep">&bull;</span>
+                <span class="license-tag">MIT License</span>
+            </div>
+        </div>
+    </footer>
 
     <script src="/app.js"></script>
 </body>
