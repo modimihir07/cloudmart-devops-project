@@ -3,7 +3,6 @@ import pytest
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
 from app.main import app
-import app.routes as routes_module
 import app.redis_client as redis_module
 
 

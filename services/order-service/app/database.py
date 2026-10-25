@@ -8,7 +8,8 @@ async def create_pool():
 
 async def init_db(pool):
     async with pool.acquire() as conn:
-        await conn.execute("""
+        await conn.execute(
+            """
             CREATE TABLE IF NOT EXISTS orders (
                 id SERIAL PRIMARY KEY,
                 session_id VARCHAR(255) NOT NULL,
@@ -18,4 +19,5 @@ async def init_db(pool):
                 created_at TIMESTAMPTZ DEFAULT NOW(),
                 updated_at TIMESTAMPTZ DEFAULT NOW()
             );
-        """)
+        """
+        )

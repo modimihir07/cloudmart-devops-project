@@ -8,7 +8,8 @@ async def create_pool():
 
 async def init_db(pool):
     async with pool.acquire() as conn:
-        await conn.execute("""
+        await conn.execute(
+            """
             CREATE TABLE IF NOT EXISTS products (
                 id SERIAL PRIMARY KEY,
                 name VARCHAR(255) NOT NULL,
@@ -16,7 +17,8 @@ async def init_db(pool):
                 price NUMERIC(10,2) NOT NULL,
                 created_at TIMESTAMPTZ DEFAULT NOW()
             );
-        """)
+        """
+        )
         count = await conn.fetchval("SELECT COUNT(*) FROM products")
         if count == 0:
             await conn.executemany(

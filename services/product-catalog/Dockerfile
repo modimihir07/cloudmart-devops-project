@@ -12,7 +12,7 @@ COPY app/ app/
 RUN chown -R cloudmart:cloudmart /app && \
     chmod -R 755 /app && \
     find /app -type f -name "*.py" -exec chmod 444 {} \;
-USER cloudmart
+USER 1001
 EXPOSE 8000
 HEALTHCHECK --interval=15s --timeout=5s --start-period=10s --retries=3 \
     CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')" || exit 1

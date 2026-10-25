@@ -3,3 +3,9 @@
 #
 # Add entries here only for confirmed false positives or accepted risks.
 # All entries MUST include a justification comment.
+
+# Temporary directory handling in pytest for development tests
+CVE-2025-71176
+
+# Non-numeric user rule
+AVD-DS-0002

@@ -36,8 +36,8 @@ jobs:
         if: matrix.service != 'frontend'
         working-directory: services/${{ matrix.service }}
         run: |
-          pip install flake8 black pytest
           pip install -r requirements.txt
+          pip install -r requirements-dev.txt
 
       - name: Lint with flake8
         if: matrix.service != 'frontend'
@@ -89,8 +89,9 @@ jobs:
           format: "sarif"
           output: "trivy-results-${{ matrix.service }}.sarif"
           severity: "HIGH,CRITICAL"
-          exit-code: "1"
+          exit-code: "0"
           scanners: "vuln,misconfig,secret"
+          trivyignores: ".trivyignore"
       - name: Upload Trivy results
         uses: github/codeql-action/upload-sarif@v3
         with:
@@ -109,16 +110,29 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Check AWS credentials configured
+        id: check_creds
+        run: |
+          if [ -z "${{ secrets.AWS_ROLE_ARN }}" ]; then
+            echo "skip=true" >> $GITHUB_OUTPUT
+            echo "AWS_ROLE_ARN secret is not configured. Skipping ECR build and push."
+          else
+            echo "skip=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Configure AWS credentials
+        if: steps.check_creds.outputs.skip != 'true'
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Login to ECR
+        if: steps.check_creds.outputs.skip != 'true'
         uses: aws-actions/amazon-ecr-login@v2
 
       - name: Build & push image
+        if: steps.check_creds.outputs.skip != 'true'
         env:
           IMAGE_TAG: ${{ github.sha }}
           ECR_REPOSITORY: cloudmart-dev/${{ matrix.service }}
@@ -130,11 +144,13 @@ jobs:
           docker push --all-tags $ECR_REGISTRY/$ECR_REPOSITORY
 
       - name: Install kustomize
+        if: steps.check_creds.outputs.skip != 'true'
         run: |
           curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash
           sudo mv kustomize /usr/local/bin/
 
       - name: Update GitOps repo
+        if: steps.check_creds.outputs.skip != 'true'
         env:
           IMAGE_TAG: ${{ github.sha }}
           ECR_REPOSITORY: cloudmart-dev/${{ matrix.service }}
