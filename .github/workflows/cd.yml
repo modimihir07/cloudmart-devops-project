@@ -1,0 +1,45 @@
+name: CD - Deploy to EKS (Manual Trigger)
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Target environment"
+        required: true
+        default: "dev"
+        type: choice
+        options:
+          - dev
+          - prod
+
+env:
+  AWS_REGION: us-east-1
+  EKS_CLUSTER: cloudmart-${{ github.event.inputs.environment }}-eks
+
+jobs:
+  deploy:
+    name: Deploy to ${{ github.event.inputs.environment }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Update kubeconfig
+        run: |
+          aws eks update-kubeconfig --name ${{ env.EKS_CLUSTER }} --region ${{ env.AWS_REGION }}
+
+      - name: Deploy with Kustomize
+        working-directory: k8s-manifests/overlays/${{ github.event.inputs.environment }}
+        run: |
+          kubectl apply -k .
+
+      - name: Verify rollout
+        run: |
+          for deploy in product-catalog cart-service order-service frontend; do
+            kubectl rollout status deployment/$deploy -n cloudmart-${{ github.event.inputs.environment }} --timeout=120s
+          done

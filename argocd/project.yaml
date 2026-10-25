@@ -1,0 +1,29 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: cloudmart
+  namespace: argocd
+spec:
+  description: "CloudMart DevOps Project - Microservices E-Commerce Platform"
+  sourceRepos:
+    - "https://github.com/YOUR_GITHUB_USERNAME/cloudmart-devops-project-gitops"
+    - "https://github.com/YOUR_GITHUB_USERNAME/cloudmart-devops-project"
+  destinations:
+    - namespace: cloudmart-dev
+      server: "https://kubernetes.default.svc"
+    - namespace: cloudmart-prod
+      server: "https://kubernetes.default.svc"
+  clusterResourceWhitelist:
+    - group: ""
+      kind: Namespace
+  namespaceResourceWhitelist:
+    - group: "*"
+      kind: "*"
+  syncWindows:
+    - kind: allow
+      schedule: "* * * * *"
+      duration: "1h"
+      applications:
+        - "cloudmart-*"
+  orphanedResources:
+    warn: false

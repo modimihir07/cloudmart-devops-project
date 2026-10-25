@@ -1,0 +1,5 @@
+# Trivy ignore list
+# Format: <VULNERABILITY-ID> [<optional-until>] <optional-justification>
+#
+# Add entries here only for confirmed false positives or accepted risks.
+# All entries MUST include a justification comment.

@@ -1,0 +1,50 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+dist/
+build/
+*.egg
+
+# Environment
+.env
+.venv
+venv/
+venv312/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Terraform
+terraform/.terraform/
+terraform/**/.terraform/
+terraform/**/*.tfstate
+terraform/**/*.tfstate.backup
+*.tfstate
+*.tfstate.backup
+crash.log
+
+# Docker
+*.tar
+*.tgz
+
+# Testing
+.coverage
+htmlcov/
+.pytest_cache/
+.coverage.*
+
+# Logs
+*.log
+
+# K8s - never commit generated or secret files
+k8s-manifests/**/secrets.yaml
+k8s-manifests/**/*secret*

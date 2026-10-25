@@ -1,0 +1,21 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: product-catalog-pdb
+  namespace: cloudmart-dev
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: product-catalog
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: order-service-pdb
+  namespace: cloudmart-dev
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: order-service

@@ -1,0 +1,92 @@
+services:
+  postgres-products:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: products
+      POSTGRES_USER: cloudmart
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5433:5432"
+    volumes:
+      - pg-products:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cloudmart -d products"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  postgres-orders:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: orders
+      POSTGRES_USER: cloudmart
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5434:5432"
+    volumes:
+      - pg-orders:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cloudmart -d orders"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  product-catalog:
+    build: services/product-catalog
+    ports:
+      - "8001:8000"
+    environment:
+      PRODUCT_DATABASE_URL: postgresql://cloudmart:postgres@postgres-products:5432/products
+      PRODUCT_SERVICE_NAME: product-catalog
+    networks:
+      default:
+        aliases:
+          - product-service
+    depends_on:
+      postgres-products:
+        condition: service_healthy
+
+  cart-service:
+    build: services/cart-service
+    ports:
+      - "8002:8000"
+    environment:
+      CART_REDIS_URL: redis://redis:6379/0
+      CART_SERVICE_NAME: cart-service
+    depends_on:
+      redis:
+        condition: service_healthy
+
+  order-service:
+    build: services/order-service
+    ports:
+      - "8003:8000"
+    environment:
+      ORDER_DATABASE_URL: postgresql://cloudmart:postgres@postgres-orders:5432/orders
+      ORDER_SERVICE_NAME: order-service
+    depends_on:
+      postgres-orders:
+        condition: service_healthy
+
+  frontend:
+    build: services/frontend
+    ports:
+      - "8080:8080"
+    depends_on:
+      - product-catalog
+      - cart-service
+      - order-service
+
+volumes:
+  pg-products:
+  pg-orders:

@@ -1,0 +1,151 @@
+name: CI - Lint, Test, Scan, Build & Push
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  AWS_REGION: us-east-1
+  ECR_REGISTRY: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com
+  GITOPS_REPO: YOUR_GITHUB_USERNAME/cloudmart-devops-project-gitops
+
+permissions:
+  contents: read
+  security-events: write
+  id-token: write
+
+jobs:
+  lint-test:
+    name: Lint & Unit Tests
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [frontend, product-catalog, cart-service, order-service]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        if: matrix.service != 'frontend'
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        if: matrix.service != 'frontend'
+        working-directory: services/${{ matrix.service }}
+        run: |
+          pip install flake8 black pytest
+          pip install -r requirements.txt
+
+      - name: Lint with flake8
+        if: matrix.service != 'frontend'
+        working-directory: services/${{ matrix.service }}
+        run: flake8 . --max-line-length=100 --exclude=tests
+
+      - name: Check formatting with black
+        if: matrix.service != 'frontend'
+        working-directory: services/${{ matrix.service }}
+        run: black --check --diff .
+
+      - name: Run unit tests
+        working-directory: services/${{ matrix.service }}
+        run: |
+          if [ "${{ matrix.service }}" = "frontend" ]; then
+            pip install pytest && pytest tests/ -v
+          else
+            python -m pytest tests/ -v
+          fi
+
+  codeql:
+    name: SAST - CodeQL
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: python
+          queries: security-and-quality
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+
+  trivy-scan:
+    name: Container Scan - Trivy
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [frontend, product-catalog, cart-service, order-service]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run Trivy on Dockerfile
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: "fs"
+          scan-ref: services/${{ matrix.service }}
+          format: "sarif"
+          output: "trivy-results-${{ matrix.service }}.sarif"
+          severity: "HIGH,CRITICAL"
+          exit-code: "1"
+          scanners: "vuln,misconfig,secret"
+      - name: Upload Trivy results
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: "trivy-results-${{ matrix.service }}.sarif"
+          category: "trivy-${{ matrix.service }}"
+        if: always()
+
+  build-and-push:
+    name: Build & Push to ECR
+    needs: [lint-test, codeql, trivy-scan]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    strategy:
+      matrix:
+        service: [frontend, product-catalog, cart-service, order-service]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build & push image
+        env:
+          IMAGE_TAG: ${{ github.sha }}
+          ECR_REPOSITORY: cloudmart-dev/${{ matrix.service }}
+        run: |
+          docker build \
+            -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG \
+            -t $ECR_REGISTRY/$ECR_REPOSITORY:latest \
+            services/${{ matrix.service }}
+          docker push --all-tags $ECR_REGISTRY/$ECR_REPOSITORY
+
+      - name: Install kustomize
+        run: |
+          curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash
+          sudo mv kustomize /usr/local/bin/
+
+      - name: Update GitOps repo
+        env:
+          IMAGE_TAG: ${{ github.sha }}
+          ECR_REPOSITORY: cloudmart-dev/${{ matrix.service }}
+          GH_TOKEN: ${{ secrets.GITOPS_TOKEN }}
+        run: |
+          git clone https://x-access-token:${GH_TOKEN}@github.com/${{ env.GITOPS_REPO }}.git /tmp/gitops
+          cd /tmp/gitops
+          kustomize edit set image \
+            "${{ matrix.service }}=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+          git config user.name "CloudMart CI"
+          git config user.email "ci@cloudmart.dev"
+          git add -A
+          git commit -m "chore: update ${{ matrix.service }} image to ${{ github.sha }}" || true
+          git push

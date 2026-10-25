@@ -1,0 +1,30 @@
+apiVersion: jaegertracing.io/v1
+kind: Jaeger
+metadata:
+  name: jaeger
+  namespace: observability
+spec:
+  strategy: allInOne
+  storage:
+    type: memory
+    options:
+      memory:
+        max-traces: 50000
+  ingress:
+    enabled: true
+    ingressClassName: alb
+    annotations:
+      alb.ingress.kubernetes.io/scheme: internet-facing
+      alb.ingress.kubernetes.io/target-type: ip
+    hosts:
+      - jaeger.cloudmart-dev.YOUR_IP.nip.io
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 100m
+    limits:
+      memory: 512Mi
+      cpu: 200m
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1001

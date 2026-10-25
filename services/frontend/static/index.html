@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CloudMart DevOps Project</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>CloudMart DevOps Project</h1>
+            <nav>
+                <a href="#" onclick="showSection('products')" class="active" id="nav-products">Products</a>
+                <a href="#" onclick="openCartModal()" id="cart-link">Cart (<span id="cart-count">0</span>)</a>
+                <a href="#" onclick="openOrdersModal()" id="orders-link">Orders</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="hero">
+            <h2>Microservices E-Commerce Platform</h2>
+            <p>Production-Grade DevOps Capstone on AWS EKS</p>
+            <div class="stack-badges">
+                <span>EKS 1.31</span>
+                <span>FastAPI</span>
+                <span>PostgreSQL 16</span>
+                <span>Redis 7</span>
+                <span>Terraform</span>
+                <span>ArgoCD</span>
+                <span>Prometheus</span>
+            </div>
+            <div class="session-info">
+                <span>Active Session: <strong id="session-display">...</strong></span>
+            </div>
+        </section>
+
+        <section class="products" id="products-grid">
+            <div class="loading">Loading products...</div>
+        </section>
+    </main>
+
+    <!-- Cart Modal -->
+    <div id="cart-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Shopping Cart</h3>
+                <span class="close-btn" onclick="closeCartModal()">&times;</span>
+            </div>
+            <div id="cart-items-container" class="cart-items">
+                <p class="empty-state">Your cart is empty.</p>
+            </div>
+            <div class="cart-footer">
+                <div class="cart-total-bar">
+                    <span>Total:</span>
+                    <strong id="cart-total-price">$0.00</strong>
+                </div>
+                <div class="cart-actions">
+                    <button class="btn btn-secondary" onclick="closeCartModal()">Continue Shopping</button>
+                    <button class="btn btn-primary" id="checkout-btn" onclick="checkout()" disabled>Place Order</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Orders Modal -->
+    <div id="orders-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Order History</h3>
+                <span class="close-btn" onclick="closeOrdersModal()">&times;</span>
+            </div>
+            <div id="orders-container" class="orders-list">
+                <p class="empty-state">Loading orders...</p>
+            </div>
+            <div class="cart-footer">
+                <button class="btn btn-secondary" onclick="closeOrdersModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/app.js"></script>
+</body>
+</html>

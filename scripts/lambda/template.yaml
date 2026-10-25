@@ -1,0 +1,63 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: "CloudMart DevOps Project - PagerDuty Forwarder"
+
+Parameters:
+  PagerDutyRoutingKey:
+    Type: String
+    Description: PagerDuty Events API v2 Integration Key
+    NoEcho: true
+  PagerDutyFromEmail:
+    Type: String
+    Description: Email for PagerDuty deduplication
+    Default: cloudmart@example.com
+
+Resources:
+  PagerDutyForwarderFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: .
+      Handler: pagerduty-forwarder.lambda_handler
+      Runtime: python3.12
+      Timeout: 30
+      MemorySize: 128
+      Environment:
+        Variables:
+          PAGERDUTY_ROUTING_KEY: !Ref PagerDutyRoutingKey
+          PAGERDUTY_FROM_EMAIL: !Ref PagerDutyFromEmail
+          LOG_LEVEL: INFO
+      Policies:
+        - AWSLambdaBasicExecutionRole
+      Events:
+        SNSAlertTopic:
+          Type: SNS
+          Properties:
+            Topic: !Ref AlertTopic
+
+  AlertTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: cloudmart-alerts
+      DisplayName: "CloudMart Alert Notifications"
+
+  AlertTopicPolicy:
+    Type: AWS::SNS::TopicPolicy
+    Properties:
+      Topics:
+        - !Ref AlertTopic
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: cloudwatch.amazonaws.com
+            Action: sns:Publish
+            Resource: !Ref AlertTopic
+
+Outputs:
+  FunctionName:
+    Description: "Lambda function name"
+    Value: !Ref PagerDutyForwarderFunction
+  TopicArn:
+    Description: "SNS Topic ARN"
+    Value: !Ref AlertTopic
